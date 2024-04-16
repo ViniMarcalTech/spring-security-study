@@ -43,7 +43,7 @@ public class JwtService {
 
 
     private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(keyGenerator.getKey());
+        byte[] keyBytes = Decoders.BASE64.decode(keyGenerator.getKey().toString());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -55,15 +55,21 @@ public class JwtService {
                                 UserDetails userDetails){
 
         Date creationDate = new Date(System.currentTimeMillis());
-        Long expirationMinutes = 10L;
+
 
         return Jwts.builder()
                 .claims().add(extraClaims).and()
                 .subject(userDetails.getUsername())
                 .issuedAt(creationDate)
-                .expiration(creationDate.getTime() + (1000L * 60L * expirationMinutes))
+                .expiration(getExpirationDate(creationDate))
                 .signWith(getSignInKey(), SignatureAlgorithm.ES256)
                 .compact();
+    }
+
+    private Date getExpirationDate(Date creationDate) {
+        Long expirationMinutes = 10L;
+        creationDate.setTime(creationDate.getTime() + (1000L * 60L * expirationMinutes));
+        return creationDate;
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails){
@@ -76,7 +82,7 @@ public class JwtService {
     }
 
     private Date extractExpiration(String token) {
-        extractClaim(token,Claims::getExpiration);
+        return extractClaim(token,Claims::getExpiration);
 
     }
 
