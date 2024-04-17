@@ -61,12 +61,12 @@ public class JwtService {
                 .claims().add(extraClaims).and()
                 .subject(userDetails.getUsername())
                 .issuedAt(creationDate)
-                .expiration(getExpirationDate(creationDate))
+                .expiration(generateExpirationDate(creationDate))
                 .signWith(getSignInKey(), SignatureAlgorithm.ES256)
                 .compact();
     }
 
-    private Date getExpirationDate(Date creationDate) {
+    private Date generateExpirationDate(Date creationDate) {
         Long expirationMinutes = 10L;
         creationDate.setTime(creationDate.getTime() + (1000L * 60L * expirationMinutes));
         return creationDate;
