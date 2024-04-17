@@ -19,7 +19,7 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class JwtService {
 
-    private static SecretKeyGenerator keyGenerator;
+    private final  SecretKeyGenerator keyGenerator;
 
 
     public String extractUsername(String token) {
@@ -41,12 +41,6 @@ public class JwtService {
                 .getPayload();
     }
 
-
-    private Key getSignInKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(keyGenerator.getKey().toString());
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
     public String generateToken(UserDetails userDetails){
         return generateToken(new HashMap<>(), userDetails);
     }
@@ -62,7 +56,7 @@ public class JwtService {
                 .subject(userDetails.getUsername())
                 .issuedAt(creationDate)
                 .expiration(generateExpirationDate(creationDate))
-                .signWith(getSignInKey(), SignatureAlgorithm.ES256)
+                .signWith(keyGenerator.getKey())
                 .compact();
     }
 
